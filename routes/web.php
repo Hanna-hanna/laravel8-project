@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Post;
+use App\Models\Category;
+use Illuminate\Log\Logger;
 //use File;
 use Illuminate\Support\Facades\Route;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
@@ -18,10 +20,14 @@ use Spatie\YamlFrontMatter\YamlFrontMatter;
 
 Route::get('/', function () {
 
-    $posts = Post::all();
+    Illuminate\Support\Facades\DB::listen(function ($query) {
+        //Illuminate\Support\Facades\Log::info('foo');
+        Logger($query->sql, $query->bindings);
+    });
+    
 
     return view('posts', [
-        'posts' => $posts
+        'posts' => Post::with('category')->get()
     ]);
 
     // $posts = array_map(function ($file) {
@@ -48,5 +54,11 @@ Route::get('posts/{post:slug}', function (Post $post) { //Post::where('slug', $p
   
     return view('post', [
         'post' => $post
+    ]);
+});
+
+Route::get('categories/{category:slug}', function (Category $category) {
+    return view('posts', [
+        'posts' => $category->posts
     ]);
 });
